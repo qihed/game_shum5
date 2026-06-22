@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ШУМ.Журналистика — 100 к 1</title>
+  <style>
+    :root {
+      --pink: #ff1493;
+      --mint: #86d2c5;
+      --white: #ffffff;
+      --answer-h: clamp(104px, 13vh, 142px);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      font-family: Montserrat, Arial, Helvetica, sans-serif;
+      color: var(--pink);
+      background: var(--white);
+      overflow: auto;
+    }
+
+    button { font: inherit; cursor: pointer; }
+
+    .app {
+      width: 100vw;
+      min-height: 100vh;
+      padding: 18px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 14px;
+      background: var(--white);
+    }
+
+    .glass {
+      background: var(--white);
+      border: 3px solid var(--mint);
+      box-shadow: none;
+    }
+
+    .topbar {
+      border-radius: 28px;
+      padding: 14px 18px;
+      display: grid;
+      grid-template-columns: minmax(320px, 1fr) auto minmax(220px, 1fr);
+      gap: 18px;
+      align-items: center;
+    }
+
+    .brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    .logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      color: var(--white);
+      background: var(--pink);
+      font-weight: 1000;
+      font-size: 30px;
+      flex: 0 0 auto;
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(22px, 1.6vw, 30px);
+      line-height: 1;
+      letter-spacing: -.055em;
+      font-weight: 1000;
+      color: var(--pink);
+    }
+
+    .round-badge {
+      justify-self: center;
+      border-radius: 999px;
+      padding: 12px 26px;
+      color: var(--white);
+      background: var(--mint);
+      font-weight: 1000;
+      letter-spacing: -.035em;
+      font-size: clamp(18px, 1.6vw, 24px);
+      text-align: center;
+      min-width: 230px;
+      white-space: nowrap;
+    }
+
+    .top-actions { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+    .pill {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 17px;
+      font-weight: 950;
+      color: var(--white);
+      background: var(--pink);
+      transition: transform .28s cubic-bezier(.22, 1, .36, 1), opacity .28s ease, background-color .28s ease, border-color .28s ease;
+      white-space: nowrap;
+    }
+    .pill:hover { transform: translateY(-1px); }
+    .pill.secondary {
+      color: var(--pink);
+      background: var(--white);
+      border: 3px solid var(--pink);
+    }
+    .pill.mint {
+      color: var(--white);
+      background: var(--mint);
+    }
+    .pill:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .main {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(720px, 1fr) 380px;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .board {
+      border-radius: 34px;
+      padding: 18px;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 14px;
+      min-width: 0;
+      min-height: 0;
+      overflow: visible;
+    }
+
+    .question-card {
+      border-radius: 28px;
+      padding: 24px 28px;
+      min-height: clamp(150px, 21vh, 220px);
+      color: var(--white);
+      display: grid;
+      align-content: center;
+      background: var(--pink);
+      overflow: hidden;
+      position: relative;
+    }
+    .question-card::before {
+      content: "ВОПРОС " attr(data-q) " / " attr(data-total);
+      position: absolute;
+      top: 16px;
+      right: 22px;
+      font-size: 13px;
+      letter-spacing: .13em;
+      font-weight: 1000;
+      color: var(--white);
+    }
+    .question-label {
+      margin: 0 0 12px;
+      max-width: 82%;
+      font-size: 14px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      font-weight: 1000;
+      color: var(--white);
+    }
+    .question {
+      margin: 0;
+      max-width: 96%;
+      font-size: clamp(30px, 3.1vw, 56px);
+      line-height: 1.05;
+      letter-spacing: -.06em;
+      font-weight: 1000;
+      color: var(--white);
+      text-wrap: balance;
+      overflow-wrap: normal;
+      word-break: normal;
+    }
+
+    .answers {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      align-content: stretch;
+    }
+
+    .answer {
+      border: 3px solid var(--mint);
+      min-height: var(--answer-h);
+      border-radius: 24px;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr) 86px;
+      gap: 14px;
+      align-items: center;
+      text-align: left;
+      color: var(--pink);
+      background: var(--white);
+      overflow: hidden;
+      position: relative;
+      transform: translateZ(0);
+      will-change: transform, border-color, background-color;
+      transition:
+        transform .38s cubic-bezier(.22, 1, .36, 1),
+        border-color .38s ease,
+        background-color .38s ease,
+        opacity .38s ease,
+        box-shadow .38s ease;
+    }
+    .answer:hover:not(:disabled) { transform: translateY(-3px); }
+    .answer:disabled { cursor: default; }
+    .answer.closed,
+    .answer.closed:nth-child(even) {
+      background: var(--white);
+      color: var(--pink);
+      border-color: var(--mint);
+      text-align: left;
+    }
+    .answer.closed:nth-child(odd) { border-color: var(--pink); }
+    .answer.closed .num {
+      color: var(--pink);
+      background: var(--white);
+      border: 4px solid var(--pink);
+      transform: scale(1.08);
+    }
+    .answer.closed:nth-child(even) .num {
+      color: var(--mint);
+      border-color: var(--mint);
+    }
+    .answer.closed .answer-main,
+    .answer.closed .points-chip {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(8px);
+    }
+    .answer.selected {
+      background: var(--white);
+      border-color: var(--mint);
+      animation: cardOpen .52s cubic-bezier(.22, 1, .36, 1) both;
+    }
+    .answer.selected.popular { border-color: var(--pink); }
+    .answer.selected .answer-main,
+    .answer.selected .points-chip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    @keyframes cardOpen {
+      0% { transform: translateY(8px) scale(.985); opacity: .9; }
+      55% { transform: translateY(-2px) scale(1.006); opacity: 1; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .num {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      color: var(--white);
+      font-weight: 1000;
+      font-size: 25px;
+      background: var(--pink);
+      flex: 0 0 auto;
+      transition: transform .42s cubic-bezier(.22, 1, .36, 1), background-color .38s ease, color .38s ease, border-color .38s ease;
+    }
+    .answer-main {
+      min-width: 0;
+      transition: opacity .42s ease, transform .42s cubic-bezier(.22, 1, .36, 1), visibility .42s ease;
+    }
+    .answer-text {
+      font-size: clamp(20px, 1.55vw, 30px);
+      line-height: 1.1;
+      font-weight: 1000;
+      letter-spacing: -.045em;
+      overflow-wrap: normal;
+      word-break: normal;
+      color: var(--pink);
+    }
+    .answer-note {
+      margin-top: 7px;
+      font-size: 12px;
+      line-height: 1.1;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--mint);
+      font-weight: 1000;
+    }
+    .points-chip {
+      justify-self: end;
+      width: 78px;
+      height: 54px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      font-weight: 1000;
+      font-size: 24px;
+      color: var(--white);
+      background: var(--mint);
+      transition: opacity .42s ease, transform .42s cubic-bezier(.22, 1, .36, 1), background-color .38s ease, visibility .42s ease;
+    }
+    .answer.selected.popular .points-chip { background: var(--pink); }
+
+    .score-panel {
+      border-radius: 34px;
+      padding: 16px;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 12px;
+    }
+    .score-title {
+      border-radius: 24px;
+      padding: 18px;
+      background: var(--mint);
+      color: var(--white);
+    }
+    .score-title .label {
+      font-size: 12px;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      font-weight: 1000;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+    .score-title .rank {
+      font-size: clamp(28px, 2.2vw, 38px);
+      line-height: 1;
+      letter-spacing: -.06em;
+      font-weight: 1000;
+      color: var(--white);
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .score-card {
+      border-radius: 22px;
+      padding: 14px;
+      background: var(--white);
+      border: 3px solid var(--pink);
+      min-width: 0;
+    }
+    .score-card:nth-child(even) { border-color: var(--mint); }
+    .score-card .label {
+      font-size: 11px;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: var(--mint);
+      font-weight: 1000;
+      margin-bottom: 6px;
+    }
+    .score-card .value {
+      font-size: clamp(28px, 2.4vw, 42px);
+      line-height: 1;
+      font-weight: 1000;
+      letter-spacing: -.06em;
+      color: var(--pink);
+      transition: transform .32s cubic-bezier(.22, 1, .36, 1), opacity .32s ease;
+    }
+    .score-card .value.bump { animation: scoreBump .42s cubic-bezier(.22, 1, .36, 1); }
+    @keyframes scoreBump {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+    .side-actions { display: grid; gap: 9px; align-content: end; }
+    .side-actions .pill { width: 100%; }
+
+    .footer {
+      border-radius: 24px;
+      padding: 10px 14px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      align-items: center;
+      font-size: 13px;
+      color: var(--pink);
+      font-weight: 850;
+      min-width: 0;
+    }
+    .footer .center { text-align: center; font-weight: 1000; color: var(--pink); }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(255,255,255,.92);
+      z-index: 30;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .36s ease, visibility .36s ease;
+    }
+    .modal.show {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+    .modal-card {
+      width: min(860px, 96vw);
+      border-radius: 36px;
+      padding: 30px;
+      background: var(--white);
+      border: 4px solid var(--pink);
+      text-align: center;
+      transform: translateY(18px) scale(.985);
+      transition: transform .42s cubic-bezier(.22, 1, .36, 1);
+    }
+    .modal.show .modal-card { transform: translateY(0) scale(1); }
+    .modal-kicker {
+      margin: 0 0 10px;
+      font-size: 14px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-weight: 1000;
+      color: var(--mint);
+    }
+    .modal-card h2 {
+      margin: 0;
+      font-size: clamp(42px, 5vw, 76px);
+      line-height: .95;
+      letter-spacing: -.08em;
+      font-weight: 1000;
+      color: var(--pink);
+    }
+    .modal-card .score-big {
+      margin: 18px 0 4px;
+      font-size: clamp(54px, 6vw, 92px);
+      line-height: .95;
+      letter-spacing: -.08em;
+      font-weight: 1000;
+      color: var(--pink);
+    }
+    .modal-card .rank-big {
+      margin: 0 0 18px;
+      font-size: clamp(28px, 3vw, 44px);
+      line-height: 1;
+      letter-spacing: -.06em;
+      font-weight: 1000;
+      color: var(--mint);
+    }
+    .modal-card p {
+      margin: 0 auto 20px;
+      max-width: 660px;
+      font-size: 19px;
+      line-height: 1.35;
+      font-weight: 850;
+      color: var(--pink);
+    }
+    .modal-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 26px;
+      transform: translateX(-50%) translateY(18px);
+      padding: 13px 18px;
+      border-radius: 999px;
+      background: var(--pink);
+      color: var(--white);
+      font-weight: 950;
+      opacity: 0;
+      pointer-events: none;
+      transition: .18s ease;
+      z-index: 50;
+      white-space: nowrap;
+      max-width: calc(100vw - 34px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .confetti {
+      position: fixed;
+      top: -20px;
+      width: 10px;
+      height: 16px;
+      border-radius: 4px;
+      z-index: 60;
+      animation: fall 1.25s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes fall { to { transform: translateY(112vh) rotate(540deg); opacity: 0; } }
+
+
+    .board.switching .question-card,
+    .board.switching .answers {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    .question-card,
+    .answers {
+      transition: opacity .34s ease, transform .34s cubic-bezier(.22, 1, .36, 1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .001ms !important;
+      }
+    }
+
+    @media (max-width: 1260px) {
+      .app { height: auto; min-height: 100vh; }
+      .topbar, .main, .footer { grid-template-columns: 1fr; }
+      .top-actions { justify-content: flex-start; }
+      .main { grid-template-columns: 1fr; }
+      .score-panel { grid-template-rows: auto auto auto auto; }
+      .footer .center { text-align: left; }
+    }
+
+    @media (max-width: 760px) {
+      .app { padding: 10px; }
+      .topbar, .board, .score-panel { border-radius: 24px; padding: 12px; }
+      .round-badge { justify-self: start; min-width: 0; }
+      .answers { grid-template-columns: 1fr; }
+      .answer { min-height: auto; grid-template-columns: 48px minmax(0, 1fr) 68px; padding: 12px; }
+      .num { width: 46px; height: 46px; font-size: 21px; }
+      .points-chip { width: 64px; height: 46px; font-size: 20px; }
+      .question-card { min-height: 160px; padding: 22px; }
+      .question-card::before { position: static; margin-bottom: 10px; }
+      .question-label { max-width: 100%; }
+    }
+
+    @media (max-height: 820px) and (min-width: 1261px) {
+      .app { padding: 12px; gap: 10px; }
+      .topbar { padding: 10px 14px; border-radius: 24px; }
+      .logo { width: 48px; height: 48px; border-radius: 16px; font-size: 26px; }
+      .question-card { min-height: 132px; padding: 20px 24px; }
+      .question { font-size: clamp(28px, 2.65vw, 44px); }
+      .answers { gap: 10px; }
+      .answer { min-height: 88px; padding: 12px; grid-template-columns: 50px minmax(0, 1fr) 74px; }
+      .num { width: 48px; height: 48px; font-size: 22px; }
+      .answer-text { font-size: clamp(18px, 1.35vw, 25px); }
+      .points-chip { width: 70px; height: 48px; font-size: 21px; }
+      .score-card { padding: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar glass">
+      <div class="brand">
+        <div class="logo">Ш</div>
+        <div>
+          <h1>100 к 1: медиа-игра</h1>
+        </div>
+      </div>
+      <div class="round-badge">ПРОСТАЯ ИГРА</div>
+      <div class="top-actions">
+        <button class="pill secondary" id="fullscreenBtn">На весь экран</button>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="board glass">
+        <div class="question-card" id="questionCard" data-q="1" data-total="4">
+          <p class="question-label">ПРОСТАЯ ИГРА</p>
+          <h2 class="question" id="question">Вопрос загружается</h2>
+        </div>
+
+        <div class="answers" id="answers"></div>
+      </section>
+
+      <aside class="score-panel glass">
+        <div class="score-title">
+          <div class="label">Текущий ранг</div>
+          <div class="rank" id="rankName">Новичок редакции</div>
+        </div>
+
+        <div class="score-grid">
+          <div class="score-card">
+            <div class="label">Вопрос</div>
+            <div class="value" id="questionCounter">1/4</div>
+          </div>
+          <div class="score-card">
+            <div class="label">Всего</div>
+            <div class="value" id="totalScore">0</div>
+          </div>
+        </div>
+
+        <div class="side-actions">
+          <button class="pill mint" id="nextQuestion" disabled>Следующий вопрос</button>
+          <button class="pill secondary" id="showResult">Итог игры</button>
+          <button class="pill secondary" id="resetGame">Сбросить игру</button>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="footer glass">
+      <div class="center">ШУМ.Журналистика</div>
+    </footer>
+  </div>
+
+  <div class="modal" id="resultModal" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="modal-card">
+      <p class="modal-kicker">Итог простой игры</p>
+      <h2 id="resultTitle">Игра завершена</h2>
+      <div class="score-big" id="resultScore">0 баллов</div>
+      <div class="rank-big" id="resultRank">Новичок редакции</div>
+      <p id="resultText">Можно начинать заново.</p>
+      <div class="modal-actions">
+        <button class="pill secondary" id="closeModal">Вернуться к экрану</button>
+        <button class="pill mint" id="restartGame">Начать заново</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Готово</div>
+
+  <script>
+    const questions = [
+      {
+        theme: 'Карьерный путь журналиста',
+        question: 'С чего начинается карьерный путь журналиста?',
+        answers: [
+          { text: 'С практики или стажировки', points: 40 },
+          { text: 'С первого опубликованного материала', points: 30 },
+          { text: 'С интереса к людям и их историям', points: 20 },
+          { text: 'С медиа, блога или соцсетей в школе или университете', points: 10 }
+        ]
+      },
+      {
+        theme: 'Первый год в профессии',
+        question: 'Что тяжелее всего дается журналисту в первый год работы?',
+        answers: [
+          { text: 'Работать в быстром темпе и соблюдать сроки сдачи материалов', points: 40 },
+          { text: 'Не бояться правок, критики и редакторских замечаний', points: 30 },
+          { text: 'Находить героев, экспертов и договариваться об интервью', points: 20 },
+          { text: 'Проверять факты\nи не теряться в большом потоке информации', points: 10 }
+        ]
+      },
+      {
+        theme: 'Доверие аудитории',
+        question: 'Какие качества позволяют стать журналистом, которому верят?',
+        answers: [
+          { text: 'Честность', points: 40 },
+          { text: 'Умение проверять факты', points: 30 },
+          { text: 'Ответственность за каждое слово', points: 20 },
+          { text: 'Уважение к герою и аудитории', points: 10 }
+        ]
+      },
+      {
+        theme: 'Восстановление после эфира',
+        question: 'Какой вид отдыха позволяет расслабиться журналисту?',
+        answers: [
+          { text: 'Спокойствие, сон, книги, сериалы', points: 40 },
+          { text: 'Прогулки с друзьями', points: 30 },
+          { text: 'Поездка или смена обстановки', points: 20 },
+          { text: 'Спорт, танцы или любая физическая активность', points: 10 }
+        ]
+      }
+    ];
+
+    const ranks = [
+      { min: 0, name: 'Новичок редакции', text: 'Пока только получил бейдж, но уже слышит, где рождается инфоповод.' },
+      { min: 80, name: 'Стажёр эфира', text: 'Уже не теряется в редакции и почти не боится сроков сдачи материалов и большой команды.' },
+      { min: 150, name: 'Репортёр на районе', text: 'Видит историю там, где другие видят просто новость.' },
+      { min: 230, name: 'Редактор смыслов', text: 'Уверенно собирает смыслы, людей и факты в один выпуск.' },
+      { min: 320, name: 'Властелин инфоповода', text: 'Чувствует медиаполе, умеет с ним работать, творить и качественно выполнять свою работу.' },
+      { min: 420, name: 'Голос, которому верят', text: 'Умеет управлять вниманием аудитории, создавать качественные материалы и смыслы.' },
+      { min: 500, name: 'Гений медиа', text: 'Создает честный и яркий материал, которому верит аудитория. Создает и формирует будущее страны через свое сильное слово.' }
+    ];
+
+    const state = {
+      questionIndex: 0,
+      openedIndexes: new Set(),
+      questionScore: 0,
+      roundScore: 0,
+      totalScore: 0
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const nodes = {
+      questionCard: $('questionCard'),
+      question: $('question'),
+      answers: $('answers'),
+      board: document.querySelector('.board'),
+      questionScore: $('questionScore'),
+      questionCounter: $('questionCounter'),
+      roundScore: $('roundScore'),
+      totalScore: $('totalScore'),
+      rankName: $('rankName'),
+      nextQuestion: $('nextQuestion'),
+      resultModal: $('resultModal'),
+      resultScore: $('resultScore'),
+      resultRank: $('resultRank'),
+      resultText: $('resultText'),
+      toast: $('toast')
+    };
+
+    function currentQuestion() {
+      return questions[state.questionIndex];
+    }
+
+    function getRank(score) {
+      let current = ranks[0];
+      for (const rank of ranks) {
+        if (score >= rank.min) current = rank;
+      }
+      return current;
+    }
+
+    function showToast(text) {
+      nodes.toast.textContent = text;
+      nodes.toast.classList.add('show');
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => nodes.toast.classList.remove('show'), 1000);
+    }
+
+    function playTone(kind = 'open') {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = kind === 'popular' ? 820 : kind === 'next' ? 540 : 300;
+        osc.type = kind === 'popular' ? 'triangle' : 'sine';
+        gain.gain.setValueAtTime(.0001, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(.065, ctx.currentTime + .02);
+        gain.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + .18);
+        osc.start();
+        osc.stop(ctx.currentTime + .20);
+      } catch (e) {}
+    }
+
+    function confetti() {
+      const colors = ['#ff1493', '#86d2c5'];
+      for (let i = 0; i < 30; i++) {
+        const el = document.createElement('div');
+        el.className = 'confetti';
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+        el.style.animationDelay = (Math.random() * .18) + 's';
+        el.style.transform = `rotate(${Math.random()*180}deg)`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1500);
+      }
+    }
+
+    function render() {
+      const q = currentQuestion();
+
+      nodes.questionCard.dataset.q = String(state.questionIndex + 1);
+      nodes.questionCard.dataset.total = String(questions.length);
+      nodes.question.innerHTML = typographRu(q.question);
+      updateScoreUi(false);
+      renderAnswers(q);
+    }
+
+    function updateScoreUi(animate = true) {
+      const rank = getRank(state.roundScore);
+      nodes.questionCounter.textContent = `${state.questionIndex + 1}/${questions.length}`;
+      if (nodes.questionScore) nodes.questionScore.textContent = String(state.questionScore);
+      if (nodes.roundScore) nodes.roundScore.textContent = String(state.roundScore);
+      nodes.totalScore.textContent = String(state.totalScore);
+      nodes.rankName.textContent = rank.name;
+      nodes.nextQuestion.disabled = state.openedIndexes.size === 0;
+      nodes.nextQuestion.textContent = state.questionIndex === questions.length - 1 ? 'Показать итог' : 'Следующий вопрос';
+
+      if (animate) {
+        [nodes.totalScore, nodes.questionCounter].filter(Boolean).forEach((node) => {
+          node.classList.remove('bump');
+          void node.offsetWidth;
+          node.classList.add('bump');
+        });
+      }
+    }
+
+    function renderAnswers(q) {
+      nodes.answers.innerHTML = '';
+      q.answers.forEach((answer, index) => {
+        const btn = document.createElement('button');
+        const isPopular = index === 0;
+        const isOpen = state.openedIndexes.has(index);
+        const earned = answer.points * (isPopular ? 2 : 1);
+        btn.type = 'button';
+        btn.className = `answer ${isOpen ? 'selected' : 'closed'} ${isOpen && isPopular ? 'popular' : ''}`;
+        btn.disabled = isOpen;
+        btn.dataset.index = String(index);
+        btn.onclick = () => openAnswer(index);
+        btn.setAttribute('aria-label', isOpen ? `Ответ ${index + 1} открыт` : `Открыть ответ ${index + 1}`);
+        btn.innerHTML = `
+          <div class="num">${index + 1}</div>
+          <div class="answer-main">
+            <div class="answer-text">${isOpen ? typographRu(answer.text) : ''}</div>
+            <div class="answer-note">${isOpen ? (isPopular ? 'Самый популярный · баллы ×2' : 'Баллы за ответ') : ''}</div>
+          </div>
+          <div class="points-chip">${isOpen ? earned : ''}</div>
+        `;
+        nodes.answers.appendChild(btn);
+      });
+    }
+
+    function openAnswer(index) {
+      if (state.openedIndexes.has(index)) return;
+      const q = currentQuestion();
+      const answer = q.answers[index];
+      const multiplier = index === 0 ? 2 : 1;
+      const earned = answer.points * multiplier;
+
+      state.openedIndexes.add(index);
+      state.questionScore += earned;
+      state.roundScore += earned;
+      state.totalScore += earned;
+
+      revealAnswerCard(index, answer, earned);
+      updateScoreUi(true);
+      playTone(index === 0 ? 'popular' : 'open');
+      if (index === 0) confetti();
+      showToast(`+${earned} баллов`);
+    }
+
+    function revealAnswerCard(index, answer, earned) {
+      const btn = nodes.answers.querySelector(`[data-index="${index}"]`);
+      if (!btn) return;
+      const isPopular = index === 0;
+      btn.disabled = true;
+      btn.setAttribute('aria-label', `Ответ ${index + 1} открыт`);
+      btn.classList.remove('closed');
+      btn.classList.add('selected');
+      if (isPopular) btn.classList.add('popular');
+
+      const textNode = btn.querySelector('.answer-text');
+      const noteNode = btn.querySelector('.answer-note');
+      const pointsNode = btn.querySelector('.points-chip');
+      if (textNode) textNode.innerHTML = typographRu(answer.text);
+      if (noteNode) noteNode.textContent = isPopular ? 'Самый популярный · баллы ×2' : 'Баллы за ответ';
+      if (pointsNode) pointsNode.textContent = String(earned);
+    }
+
+    function nextQuestion() {
+      if (state.openedIndexes.size === 0) {
+        showToast('Сначала откройте хотя бы одну карточку');
+        return;
+      }
+      if (state.questionIndex >= questions.length - 1) {
+        showResult();
+        return;
+      }
+      nodes.board?.classList.add('switching');
+      playTone('next');
+      window.setTimeout(() => {
+        state.questionIndex += 1;
+        state.openedIndexes = new Set();
+        state.questionScore = 0;
+        render();
+        window.requestAnimationFrame(() => nodes.board?.classList.remove('switching'));
+      }, 220);
+    }
+
+    function showResult() {
+      const rank = getRank(state.roundScore);
+      nodes.resultScore.textContent = `${state.roundScore} баллов`;
+      nodes.resultRank.textContent = rank.name;
+      nodes.resultText.innerHTML = typographRu(rank.text);
+      nodes.resultModal.classList.add('show');
+    }
+
+    function closeModal() {
+      nodes.resultModal.classList.remove('show');
+    }
+
+    function resetGame() {
+      state.questionIndex = 0;
+      state.openedIndexes = new Set();
+      state.questionScore = 0;
+      state.roundScore = 0;
+      state.totalScore = 0;
+      closeModal();
+      render();
+      showToast('Игра сброшена');
+    }
+
+    function fullscreen() {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+      else document.exitFullscreen?.();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function typographRu(value) {
+      const shortWords = '(?:[ВвКкСсУуОоАаИи]|[Вв]о|[Кк]о|[Сс]о|[Нн]а|[Пп]о|[Зз]а|[Оо]т|[Дд]о|[Ии]з|[Оо]б|[Оо]бо|[Бб]ез|[Дд]ля|[Пп]ри|[Пп]ро|[Нн]ад|[Пп]од|[Пп]еред|[Чч]ерез|[Мм]ежду|[Нн]е|[Нн]о|[Дд]а|[Ии]ли|[Лл]ибо|[Чч]то|[Кк]ак|[Ее]сли|[Чч]тобы|[Кк]огда|[Гг]де)';
+      const html = escapeHtml(value).replace(new RegExp('(^|[\\s(«„“"])(?:' + shortWords + ')\\s+', 'g'), (match, prefix) => {
+        const word = match.slice(prefix.length).trim();
+        return `${prefix}${word}&nbsp;`;
+      });
+      return html.replace(/\n/g, '<br>');
+    }
+
+    $('nextQuestion').onclick = nextQuestion;
+    $('showResult').onclick = showResult;
+    $('resetGame').onclick = resetGame;
+    $('closeModal').onclick = closeModal;
+    $('restartGame').onclick = resetGame;
+    $('fullscreenBtn').onclick = fullscreen;
+
+    document.addEventListener('keydown', (e) => {
+      const tag = document.activeElement?.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+      if (e.key >= '1' && e.key <= '6') openAnswer(Number(e.key) - 1);
+      if (e.key === 'Enter') nextQuestion();
+      if (e.key.toLowerCase() === 'r') resetGame();
+      if (e.key === 'Escape') closeModal();
+      if (e.key.toLowerCase() === 'f') fullscreen();
+    });
+
+    render();
+  </script>
+</body>
+</html>
